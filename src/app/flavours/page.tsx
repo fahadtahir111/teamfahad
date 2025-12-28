@@ -45,13 +45,13 @@ export default function FlavoursPage() {
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
 
     return (
-        <div className="relative min-h-screen bg-background flex flex-col items-center justify-center overflow-hidden transition-colors duration-1000">
+        <div className="relative min-h-screen bg-background flex flex-col items-center justify-center overflow-x-hidden transition-colors duration-1000">
             {/* Background Particles can be themed too, but for now we keep the same ones */}
             <ParticleBackground />
 
-            <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col md:flex-row items-center gap-12 md:gap-20">
+            <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
                 {/* Left Side: Product Image */}
-                <div className="w-full md:w-1/2 flex justify-center">
+                <div className="w-full lg:w-1/2 flex justify-center">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeFlavor.id}
@@ -59,7 +59,7 @@ export default function FlavoursPage() {
                             animate={{ rotate: 0, opacity: 1, scale: 1 }}
                             exit={{ rotate: 20, opacity: 0, scale: 0.5 }}
                             transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                            className="relative w-64 h-64 md:w-[450px] md:h-[450px]"
+                            className="relative w-full max-w-[280px] md:max-w-[380px] lg:max-w-[450px] aspect-square"
                         >
                             <Image
                                 src={activeFlavor.image}
@@ -73,7 +73,7 @@ export default function FlavoursPage() {
                 </div>
 
                 {/* Right Side: Info & Selector */}
-                <div className="w-full md:w-1/2">
+                <div className="w-full lg:w-1/2">
                     <motion.div
                         key={activeFlavor.id}
                         initial={{ y: 20, opacity: 0 }}
