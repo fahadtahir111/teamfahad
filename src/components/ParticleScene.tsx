@@ -7,9 +7,8 @@ import * as THREE from "three";
 const Particles = ({ count = 5000, color = "#FF4500" }) => {
     const points = useRef<THREE.Points>(null!);
 
-    // Use a smaller count for mobile devices to prevent lag
-    // Fixed count to avoid hydration mismatch, can be optimized with a hook if needed
-    const optimizedCount = 800;
+    // Reduced count to prevent WebGL context loss
+    const optimizedCount = 500;
 
     const particles = useMemo(() => {
         const positions = new Float32Array(optimizedCount * 3);
@@ -71,9 +70,13 @@ const ParticleScene = ({ color }: { color?: string }) => {
     return (
         <Canvas
             camera={{ position: [0, 0, 5], fov: 75 }}
-            // Optimized dpr for stability
-            dpr={1}
-            gl={{ antialias: false, powerPreference: "default" }}
+            dpr={[1, 1.5]}
+            gl={{
+                antialias: false,
+                powerPreference: "low-power",
+                preserveDrawingBuffer: true,
+                failIfMajorPerformanceCaveat: false
+            }}
         >
             <Particles color={color} />
         </Canvas>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { ParticleBackground } from "@/components/ParticleBackground";
@@ -45,9 +45,16 @@ export default function FlavoursPage() {
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
 
     return (
-        <div className="relative min-h-screen bg-background flex flex-col items-center justify-center overflow-x-hidden transition-colors duration-1000">
-            {/* Background Particles can be themed too, but for now we keep the same ones */}
-            <ParticleBackground />
+        <div className="relative min-h-screen bg-background flex flex-col items-center justify-center overflow-x-hidden transition-colors duration-1000" style={{ position: 'relative' }}>
+            {/* Background Particles - wrapped in Suspense for faster initial load */}
+            <Suspense fallback={<div className="absolute inset-0 bg-transparent" />}>
+                <ParticleBackground />
+            </Suspense>
+
+            {/* Preload all flavor images for instant switching */}
+            {flavors.map((flavor) => (
+                <link key={flavor.id} rel="preload" as="image" href={flavor.image} />
+            ))}
 
             <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
                 {/* Left Side: Product Image */}
@@ -65,6 +72,7 @@ export default function FlavoursPage() {
                                 src={activeFlavor.image}
                                 alt={activeFlavor.name}
                                 fill
+                                priority={activeFlavor.id === flavors[0].id}
                                 className="object-contain drop-shadow-[0_0_80px_rgba(255,255,255,0.8)]"
                                 sizes="(max-width: 768px) 100vw, 450px"
                             />
@@ -122,7 +130,7 @@ export default function FlavoursPage() {
             <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30"
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 z-10"
             >
                 <span className="text-[10px] font-black uppercase tracking-[0.3em]">Vertical Dive</span>
                 <div className="w-0.5 h-10 bg-foreground/50" />

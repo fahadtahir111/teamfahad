@@ -70,7 +70,16 @@ interface FlavourSceneProps {
 
 const FlavourScene = ({ rotateY }: FlavourSceneProps) => {
     return (
-        <Canvas camera={{ position: [0, 0, 10], fov: 40 }} dpr={1} gl={{ powerPreference: "default" }}>
+        <Canvas
+            camera={{ position: [0, 0, 10], fov: 40 }}
+            dpr={[1, 1.5]}
+            gl={{
+                antialias: false,
+                powerPreference: "low-power",
+                preserveDrawingBuffer: true,
+                failIfMajorPerformanceCaveat: false
+            }}
+        >
             <ambientLight intensity={0.5} />
             <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} />
             <pointLight position={[-10, -10, -10]} color="#FF4500" intensity={0.5} />
