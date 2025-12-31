@@ -14,8 +14,16 @@ export const Footer = () => {
                         <span className="text-2xl font-black italic tracking-tighter uppercase text-white">BUBBLOE</span>
                     </div>
                     <p className="text-white/40 font-medium text-sm leading-relaxed">
-                        Engineering kinetic experiences for the next century of achievers. Founded in New Neo-Tokyo, 2088.
+                        Premium energy drinks engineered for maximum performance. Experience explosive flavors with natural ingredients.
                     </p>
+                    <div className="flex flex-col gap-2">
+                        <p className="text-white/50 font-bold text-xs uppercase tracking-wider">
+                            CEO: <span className="text-energy">Muhammad Fahad</span>
+                        </p>
+                        <p className="text-white/40 font-medium text-xs">
+                            Made in <span className="text-energy font-bold">Pakistan</span>
+                        </p>
+                    </div>
                     <div className="flex gap-4">
                         <Twitter className="w-5 h-5 text-white/40 hover:text-energy cursor-pointer transition-colors" />
                         <Instagram className="w-5 h-5 text-white/40 hover:text-energy cursor-pointer transition-colors" />
@@ -56,10 +64,15 @@ export const Footer = () => {
             </div>
 
             <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/20 italic">© 2088 BUBBLOE KINETICS. ALL RIGHTS RESERVED.</p>
+                <div className="flex flex-col gap-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/20 italic">© 2024 BUBBLOE. ALL RIGHTS RESERVED.</p>
+                    <p className="text-[10px] font-medium text-white/30">
+                        Made in <span className="text-energy font-bold">Pakistan</span> | CEO: <span className="text-energy font-bold">Muhammad Fahad</span>
+                    </p>
+                </div>
                 <div className="flex gap-8">
                     <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-energy transition-colors italic">Privacy Policy</Link>
-                    <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-energy transition-colors italic">Terms of Surge</Link>
+                    <Link href="#" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-energy transition-colors italic">Terms of Service</Link>
                 </div>
             </div>
         </footer>

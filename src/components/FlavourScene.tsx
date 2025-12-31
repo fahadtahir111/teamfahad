@@ -15,7 +15,7 @@ const flavours = [
 const FlavourSphere = ({ color, position, speed }: any) => {
     return (
         <Float speed={speed} rotationIntensity={2} floatIntensity={1} floatingRange={[-0.5, 0.5]}>
-            <Sphere position={position} args={[0.6, 64, 64]}>
+            <Sphere position={position} args={[0.6, 32, 32]}>
                 <MeshDistortMaterial
                     color={color}
                     speed={2}
@@ -48,7 +48,7 @@ const FlavourCore = ({ rotateY }: { rotateY: any }) => {
             ))}
 
             {/* Central Core - Fixed Position */}
-            <Sphere args={[2, 128, 128]}>
+            <Sphere args={[2, 64, 64]}>
                 <MeshDistortMaterial
                     color="#FF4500"
                     speed={3}

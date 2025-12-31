@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { CustomCursor } from "@/components/CustomCursor";
 import { PageTransition } from "@/components/PageTransition";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BUBBLOE | Unleash Your Inner Flavour-Verse",
-  description: "Experience the futuristic energy of Bubbloe. Premium energy drinks with explosive flavours.",
+  title: "BUBBLOE | Premium Energy Drinks | Maximum Energy Boost",
+  description: "Premium energy drinks with maximum energy boost. Zero sugar, natural ingredients, explosive flavors. Shop now!",
 };
 
 export default function RootLayout({
@@ -33,12 +34,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
         suppressHydrationWarning
       >
-        <CustomCursor />
-        <Navbar />
-        <SmoothScroll>
-          <PageTransition>{children}</PageTransition>
-        </SmoothScroll>
-        <Footer />
+        <CartProvider>
+          <CustomCursor />
+          <Navbar />
+          <SmoothScroll>
+            <PageTransition>{children}</PageTransition>
+          </SmoothScroll>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

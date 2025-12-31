@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowLeft, ShoppingCart, Zap, Droplets, Wind } from "lucide-react";
 import Link from "next/link";
 import { ParticleBackground } from "@/components/ParticleBackground";
+import { useCart } from "@/context/CartContext";
+import { cn } from "@/lib/utils";
 
 export default function ProductDetailPage() {
     const containerRef = useRef(null);
+    const [addedToCart, setAddedToCart] = useState(false);
+    const { addToCart } = useCart();
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
@@ -96,10 +100,24 @@ export default function ProductDetailPage() {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="w-full py-6 bg-energy text-white rounded-full font-black text-2xl flex items-center justify-center gap-4 shadow-2xl shadow-energy/30"
+                            onClick={() => {
+                                addToCart({
+                                    id: 1,
+                                    name: "ORIGINAL BOOST",
+                                    price: 3.99,
+                                    image: "/images/vanilla.png",
+                                    color: "bg-[#FFFDD0]"
+                                });
+                                setAddedToCart(true);
+                                setTimeout(() => setAddedToCart(false), 2000);
+                            }}
+                            className={cn(
+                                "w-full py-6 text-white rounded-full font-black text-2xl flex items-center justify-center gap-4 shadow-2xl shadow-energy/30 transition-all",
+                                addedToCart ? "bg-green-500" : "bg-energy"
+                            )}
                         >
                             <ShoppingCart className="w-8 h-8" />
-                            ADD TO RECEPTOR
+                            {addedToCart ? "ADDED TO CART!" : "ADD TO CART"}
                         </motion.button>
                     </motion.div>
                 </div>

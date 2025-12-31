@@ -27,7 +27,7 @@ export const CanMorph = () => {
     const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.9, 1, 0.9]);
 
     return (
-        <section ref={containerRef} className="h-[120vh] relative bg-[#0a0a0a] py-20 overflow-hidden border-t border-white/5">
+        <section ref={containerRef} className="h-[120vh] relative bg-[#0a0a0a] py-12 md:py-16 lg:py-20 overflow-hidden border-t border-white/5">
             <div className="sticky top-0 h-screen w-full flex items-center justify-center">
                 {/* Background Blueprint Grid */}
                 <div className="absolute inset-0 opacity-10 pointer-events-none"
@@ -39,6 +39,29 @@ export const CanMorph = () => {
                 >
                     EVOLVE
                 </motion.h2>
+                
+                {/* Animated Energy Rings */}
+                {[...Array(3)].map((_, i) => (
+                    <motion.div
+                        key={i}
+                        animate={{ 
+                            scale: [1, 1.2 + i * 0.1, 1],
+                            opacity: [0.1, 0.2, 0.1],
+                            rotate: [0, 180, 360]
+                        }}
+                        transition={{ 
+                            duration: 4 + i * 2, 
+                            repeat: Infinity, 
+                            ease: "linear",
+                            delay: i * 0.5
+                        }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border border-energy/20 rounded-full"
+                        style={{ 
+                            width: `${200 + i * 80}px`,
+                            height: `${200 + i * 80}px`
+                        }}
+                    />
+                ))}
 
                 <div className="relative w-full max-w-6xl px-6 flex items-center justify-center perspective-[2000px]">
                     {/* Phase 01: THE ORIGIN */}

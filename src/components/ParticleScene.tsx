@@ -20,20 +20,29 @@ const Particles = ({ count = 5000, color = "#FF4500" }) => {
             new THREE.Color(color).clone().multiplyScalar(0.8), // Darker variant
         ];
 
-        for (let i = 0; i < optimizedCount; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 10;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+        // Fully deterministic pseudo-random function for purity
+        const pseudoRand = (seed: number) => {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        };
 
-            const c = colorChoices[Math.floor(Math.random() * colorChoices.length)];
+        for (let i = 0; i < optimizedCount; i++) {
+            // Use index-based seeds for positions
+            positions[i * 3] = (pseudoRand(i * 13) - 0.5) * 10;
+            positions[i * 3 + 1] = (pseudoRand(i * 17) - 0.5) * 10;
+            positions[i * 3 + 2] = (pseudoRand(i * 19) - 0.5) * 10;
+
+            // Use index-based seed for color selection
+            const colorIdx = Math.floor(pseudoRand(i * 23) * colorChoices.length);
+            const c = colorChoices[colorIdx];
             colors[i * 3] = c.r;
             colors[i * 3 + 1] = c.g;
             colors[i * 3 + 2] = c.b;
         }
         return { positions, colors };
-    }, [optimizedCount, color]);
+    }, [color]);
 
-    useFrame((state) => {
+    useFrame(() => {
         // Subtle, lag-free rotation
         if (points.current) {
             points.current.rotation.y += 0.0008;

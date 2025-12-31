@@ -36,7 +36,7 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20 px-6 flex items-center justify-center overflow-hidden">
+        <div className="min-h-screen bg-background pt-24 md:pt-32 pb-12 md:pb-20 px-4 md:px-6 flex items-center justify-center overflow-hidden">
             {/* Background Glows */}
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-energy/10 rounded-full blur-[120px]" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-mint/10 rounded-full blur-[120px]" />
@@ -48,45 +48,45 @@ export default function ContactPage() {
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                className="relative z-10 w-full max-w-2xl glass p-8 md:p-12 rounded-[40px] shadow-2xl"
+                className="relative z-10 w-full max-w-2xl glass p-6 md:p-8 lg:p-12 rounded-[32px] md:rounded-[40px] shadow-2xl"
             >
                 <header className="mb-10 text-center">
-                    <h1 className="text-3xl sm:text-4xl md:text-6xl font-black italic tracking-tighter mb-4">
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black italic tracking-tighter mb-3 md:mb-4 text-white">
                         GET IN <span className="text-energy uppercase">TOUCH</span>
                     </h1>
-                    <p className="text-foreground/60 font-medium">
-                        Have questions about the flavour-verse? We're here to help.
+                    <p className="text-white/60 font-medium text-sm md:text-base">
+                        Have questions about our energy drinks? We're here to help you power up your day.
                     </p>
                 </header>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-foreground/50 ml-4">Full Name</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-white/50 ml-2 md:ml-4 mb-1 md:mb-2 block">Full Name</label>
                             <input
                                 type="text"
                                 required
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-energy/50 transition-colors text-foreground font-medium"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-energy/50 transition-colors text-white font-medium placeholder-white/30"
                                 placeholder="John Doe"
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-black uppercase tracking-widest text-foreground/50 ml-4">Email Address</label>
+                            <label className="text-xs font-black uppercase tracking-widest text-white/50 ml-2 md:ml-4 mb-1 md:mb-2 block">Email Address</label>
                             <input
                                 type="email"
                                 required
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-energy/50 transition-colors text-foreground font-medium"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-energy/50 transition-colors text-white font-medium placeholder-white/30"
                                 placeholder="john@example.com"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-foreground/50 ml-4">Message</label>
+                        <label className="text-xs font-black uppercase tracking-widest text-white/50 ml-2 md:ml-4 mb-1 md:mb-2 block">Message</label>
                         <textarea
                             rows={4}
                             required
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-energy/50 transition-colors text-foreground font-medium resize-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-6 py-3 md:py-4 outline-none focus:border-energy/50 transition-colors text-white font-medium resize-none placeholder-white/30"
                             placeholder="What's on your mind?"
                         />
                     </div>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all ${formState === "success" ? "bg-green-500" : "bg-energy"
+                        className={`w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-base md:text-xl flex items-center justify-center gap-3 transition-all ${formState === "success" ? "bg-green-500" : "bg-energy"
                             } text-white shadow-xl shadow-energy/20`}
                         disabled={formState === "submitting"}
                     >

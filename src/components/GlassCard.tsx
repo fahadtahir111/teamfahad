@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/CartContext";
 
 interface Product {
     id: number;
@@ -17,6 +18,7 @@ interface Product {
 export const GlassCard = ({ product }: { product: Product }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
+    const { addToCart } = useCart();
 
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -109,6 +111,16 @@ export const GlassCard = ({ product }: { product: Product }) => {
                 <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                        const priceNum = parseFloat(product.price.replace("$", ""));
+                        addToCart({
+                            id: product.id,
+                            name: product.name,
+                            price: priceNum,
+                            image: product.image,
+                            color: product.color,
+                        });
+                    }}
                     className="w-full py-3 rounded-2xl bg-foreground text-background font-bold flex items-center justify-center gap-2 group-hover:bg-energy transition-colors"
                 >
                     <Plus className="w-5 h-5" />
