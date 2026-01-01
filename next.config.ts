@@ -8,11 +8,11 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     dangerouslyAllowSVG: false,
-
   },
   compress: true,
   poweredByHeader: false,
   // Optimize bundle
+  swcMinify: true,
   // Reduce JavaScript bundle size
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react', 'three'],

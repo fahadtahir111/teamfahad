@@ -90,8 +90,8 @@ const Particles = ({ count = 5000, color = "#FF4500" }) => {
 };
 
 const ParticleScene = React.memo(({ color }: { color?: string }) => {
-    const [dpr, setDpr] = useState<[number, number]>([1, 1.5]);
-
+    const [dpr, setDpr] = useState<number[]>([1, 1.5]);
+    
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const { getOptimalDPR } = require('@/lib/performance');
