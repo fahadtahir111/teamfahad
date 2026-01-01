@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Transition } from "framer-motion";
 import { ArrowRight, Zap, Droplets, Info } from "lucide-react";
 import Link from "next/link";
 import { ParticleBackground } from "./ParticleBackground";
@@ -43,7 +43,7 @@ const flavors = [
 export const Hero = () => {
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
     const reducedMotion = useReducedMotion();
-    
+
     // Optimize animation props for low-end devices
     const floatAnimation = useMemo(() => {
         if (reducedMotion) return {};
@@ -54,8 +54,8 @@ export const Hero = () => {
             opacity: [0.2, 0.4, 0.2]
         };
     }, [reducedMotion]);
-    
-    const floatTransition = useMemo(() => {
+
+    const floatTransition: Transition = useMemo(() => {
         if (reducedMotion) return { duration: 0 };
         return { duration: 6, repeat: Infinity, ease: "easeInOut" };
     }, [reducedMotion]);
@@ -93,7 +93,7 @@ export const Hero = () => {
                             scale: [1, 1.3, 1],
                             opacity: [0.15, 0.35, 0.15]
                         }}
-                        transition={reducedMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        transition={(reducedMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }) as Transition}
                         className="absolute bottom-20 right-10 w-40 h-40 bg-energy/15 rounded-full blur-3xl z-0 hidden md:block"
                     />
                 </>
