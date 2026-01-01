@@ -7,13 +7,64 @@ import { EnergyGrid } from "@/components/EnergyGrid";
 import { Preloader } from "@/components/Preloader";
 import { Zap } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useMemo } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), reducedMotion ? 500 : 1500);
+    return () => clearTimeout(timer);
+  }, [reducedMotion]);
+  
+  // Optimize particle animation
+  const particleAnimation = useMemo(() => {
+    if (reducedMotion) return {};
+    return {
+      y: [0, -100, 0],
+      x: [0, (0 % 2 === 0 ? 30 : -30), 0],
+      opacity: [0, 0.5, 0],
+      scale: [0, 1, 0]
+    };
+  }, [reducedMotion]);
+
   return (
     <div className="flex flex-col bg-background">
       <Preloader />
-      <Hero />
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[99] bg-background flex items-center justify-center"
+          >
+            <div className="flex flex-col items-center gap-6">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+              />
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-white/60 font-bold text-lg"
+              >
+                Loading...
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <Hero />
       <EnergyGrid />
       <FeaturesShowcase />
       <CanMorph />
@@ -32,16 +83,11 @@ export default function Home() {
           className="absolute inset-0 bg-energy/5 blur-[120px] rounded-full scale-150 pointer-events-none"
         />
 
-        {/* Floating Particles */}
-        {[...Array(6)].map((_, i) => (
+        {/* Floating Particles - Reduced on low-end devices */}
+        {!reducedMotion && [...Array(reducedMotion ? 0 : 3)].map((_, i) => (
           <motion.div
             key={i}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, (i % 2 === 0 ? 30 : -30), 0],
-              opacity: [0, 0.5, 0],
-              scale: [0, 1, 0]
-            }}
+            animate={particleAnimation}
             transition={{
               duration: 3 + (i % 3),
               repeat: Infinity,
@@ -111,6 +157,7 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </section>
+      </motion.div>
     </div>
   );
 }

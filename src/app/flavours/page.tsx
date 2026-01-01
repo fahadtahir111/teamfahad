@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
-import { Zap, Droplets, Wind, ArrowLeft, ShoppingCart, Sparkles } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { Zap, Droplets, Wind, ShoppingCart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/Magnetic";
 import { useCart } from "@/context/CartContext";
+import { usdToPkr } from "@/lib/currency";
 
 interface Flavor {
     id: string;
@@ -102,6 +103,8 @@ const flavors: Flavor[] = [
 export default function FlavoursPage() {
     const [selectedFlavor, setSelectedFlavor] = useState<Flavor>(flavors[0]);
     const [addedToCart, setAddedToCart] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [imagesLoaded, setImagesLoaded] = useState<Set<string>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
     const { addToCart } = useCart();
 
@@ -110,39 +113,92 @@ export default function FlavoursPage() {
         offset: ["start start", "end end"]
     });
 
-    const smoothProgress = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001
-    });
-
     const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
     const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
 
+    // Handle image loading
+    const handleImageLoad = (imagePath: string) => {
+        setImagesLoaded((prev) => {
+            const newSet = new Set(prev);
+            newSet.add(imagePath);
+            return newSet;
+        });
+    };
+
+    // Check if all initial images are loaded
+    useEffect(() => {
+        if (imagesLoaded.size >= flavors.length) {
+            setTimeout(() => setIsLoading(false), 300);
+        }
+    }, [imagesLoaded]);
+
+    // Fallback timeout to ensure page loads even if images fail
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+        }, 3000); // Max 3 seconds loading time
+        return () => clearTimeout(timeout);
+    }, []);
+
+    // Preload all flavor images
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
+        // Use HTMLImageElement to avoid conflict with Next.js Image component
+        const ImageConstructor = window.HTMLImageElement || (window as any).Image;
+        
+        flavors.forEach((flavor) => {
+            const img = document.createElement('img');
+            img.src = flavor.image;
+            img.onload = () => handleImageLoad(flavor.image);
+            img.onerror = () => handleImageLoad(flavor.image); // Still mark as loaded to prevent infinite loading
+        });
+    }, []);
+
     return (
         <div ref={containerRef} className="relative min-h-screen bg-background overflow-hidden">
-            <ParticleBackground color={selectedFlavor.accent} />
+            {/* Loading Overlay */}
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+                    >
+                        <div className="flex flex-col items-center gap-6">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+                            />
+                            <motion.p
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-white/60 font-bold text-lg"
+                            >
+                                Loading Flavors...
+                            </motion.p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            {/* Back Button */}
-            <div className="fixed top-20 md:top-24 left-4 md:left-6 lg:left-10 z-50">
-                <Link
-                    href="/"
-                    className="glass p-3 md:p-4 rounded-full flex items-center gap-2 font-bold hover:bg-energy hover:text-white transition-all group text-sm md:text-base"
-                >
-                    <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="hidden sm:inline">BACK</span>
-                </Link>
-            </div>
+            <ParticleBackground color={selectedFlavor.accent} />
 
             {/* Hero Section */}
             <motion.section
                 style={{ opacity: heroOpacity, y: heroY }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoading ? 0 : 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
                 className="relative min-h-screen flex items-center justify-center px-4 md:px-6 pt-24 md:pt-32 pb-12 md:pb-20"
             >
                 <div className="max-w-7xl w-full mx-auto">
                     <motion.div
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
+                        initial={{ y: 30, opacity: 0 }}
+                        animate={{ y: 0, opacity: isLoading ? 0 : 1 }}
+                        transition={{ duration: 0.8, delay: 0.3 }}
                         className="text-center mb-8 md:mb-12 lg:mb-16"
                     >
                         <motion.div
@@ -167,8 +223,8 @@ export default function FlavoursPage() {
                                 key={flavor.id}
                                 onClick={() => setSelectedFlavor(flavor)}
                                 initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.1 }}
+                                animate={{ opacity: isLoading ? 0 : 1, y: 0 }}
+                                transition={{ delay: 0.4 + idx * 0.1, duration: 0.6 }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 className={cn(
@@ -183,8 +239,11 @@ export default function FlavoursPage() {
                                         src={flavor.image}
                                         alt={flavor.name}
                                         fill
-                                        className="object-contain drop-shadow-2xl"
+                                        className="object-contain drop-shadow-2xl transition-opacity duration-500"
                                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                        loading="lazy"
+                                        quality={85}
+                                        onLoad={() => handleImageLoad(flavor.image)}
                                     />
                                 </div>
                                 <span className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-widest text-white text-center px-1">
@@ -203,14 +262,19 @@ export default function FlavoursPage() {
             </motion.section>
 
             {/* Detailed Flavor Showcase */}
-            <section className="relative min-h-screen flex items-center justify-center px-4 md:px-6 py-16 md:py-24 lg:py-32">
+            <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoading ? 0 : 1 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="relative min-h-screen flex items-center justify-center px-4 md:px-6 py-16 md:py-24 lg:py-32"
+            >
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={selectedFlavor.id}
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -50 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
                         className="max-w-7xl w-full mx-auto"
                     >
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center">
@@ -237,14 +301,26 @@ export default function FlavoursPage() {
                                         whileHover={{ rotateY: 5, rotateX: -5 }}
                                         className="relative w-full h-full glass rounded-[60px] border-white/20 shadow-2xl flex items-center justify-center p-8 md:p-12"
                                     >
-                                        <Image
-                                            src={selectedFlavor.image}
-                                            alt={selectedFlavor.name}
-                                            fill
-                                            className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
-                                            sizes="(max-width: 768px) 100vw, 50vw"
-                                            priority
-                                        />
+                                        <AnimatePresence mode="wait">
+                                            <motion.div
+                                                key={selectedFlavor.id}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                transition={{ duration: 0.4 }}
+                                                className="relative w-full h-full"
+                                            >
+                                                <Image
+                                                    src={selectedFlavor.image}
+                                                    alt={selectedFlavor.name}
+                                                    fill
+                                                    className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+                                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                                    priority
+                                                    quality={90}
+                                                />
+                                            </motion.div>
+                                        </AnimatePresence>
                                     </motion.div>
 
                                     {/* Floating Badge */}
@@ -370,12 +446,12 @@ export default function FlavoursPage() {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => {
-                                            // Map flavor IDs to product IDs and prices
+                                            // Map flavor IDs to product IDs and prices (in PKR)
                                             const flavorToProduct: Record<string, { id: number; price: number }> = {
-                                                vanilla: { id: 1, price: 3.99 },
-                                                peach: { id: 2, price: 4.49 },
-                                                mint: { id: 3, price: 4.49 },
-                                                berry: { id: 4, price: 3.99 }
+                                                vanilla: { id: 1, price: usdToPkr(3.99) },
+                                                peach: { id: 2, price: usdToPkr(4.49) },
+                                                mint: { id: 3, price: usdToPkr(4.49) },
+                                                berry: { id: 4, price: usdToPkr(3.99) }
                                             };
                                             const product = flavorToProduct[selectedFlavor.id];
                                             if (product) {
@@ -405,10 +481,16 @@ export default function FlavoursPage() {
                         </div>
                     </motion.div>
                 </AnimatePresence>
-            </section>
+            </motion.section>
 
             {/* Comparison Section */}
-            <section className="relative py-16 md:py-24 lg:py-32 px-4 md:px-6 border-t border-white/5">
+            <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative py-16 md:py-24 lg:py-32 px-4 md:px-6 border-t border-white/5"
+            >
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -489,7 +571,7 @@ export default function FlavoursPage() {
                         </div>
                     </motion.div>
                 </div>
-            </section>
+            </motion.section>
         </div>
     );
 }

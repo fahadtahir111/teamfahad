@@ -11,6 +11,7 @@ interface Product {
     id: number;
     name: string;
     price: string;
+    priceNum?: number;
     image: string;
     color: string;
 }
@@ -112,7 +113,7 @@ export const GlassCard = ({ product }: { product: Product }) => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => {
-                        const priceNum = parseFloat(product.price.replace("$", ""));
+                        const priceNum = product.priceNum || 0;
                         addToCart({
                             id: product.id,
                             name: product.name,

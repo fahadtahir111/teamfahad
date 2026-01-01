@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Zap, Droplets, Info } from "lucide-react";
@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ParticleBackground } from "./ParticleBackground";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "./Magnetic";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const flavors = [
     {
@@ -41,6 +42,23 @@ const flavors = [
 
 export const Hero = () => {
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
+    const reducedMotion = useReducedMotion();
+    
+    // Optimize animation props for low-end devices
+    const floatAnimation = useMemo(() => {
+        if (reducedMotion) return {};
+        return {
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.4, 0.2]
+        };
+    }, [reducedMotion]);
+    
+    const floatTransition = useMemo(() => {
+        if (reducedMotion) return { duration: 0 };
+        return { duration: 6, repeat: Infinity, ease: "easeInOut" };
+    }, [reducedMotion]);
 
     return (
         <section className="relative min-h-screen w-full flex items-center justify-center overflow-x-hidden bg-background transition-colors duration-1000">
@@ -60,27 +78,26 @@ export const Hero = () => {
                 />
             </AnimatePresence>
 
-            {/* Floating Energy Orbs */}
-            <motion.div
-                animate={{
-                    y: [0, -30, 0],
-                    x: [0, 20, 0],
-                    scale: [1, 1.2, 1],
-                    opacity: [0.2, 0.4, 0.2]
-                }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-20 left-10 w-32 h-32 bg-energy/20 rounded-full blur-3xl z-0 hidden md:block"
-            />
-            <motion.div
-                animate={{
-                    y: [0, 30, 0],
-                    x: [0, -20, 0],
-                    scale: [1, 1.3, 1],
-                    opacity: [0.15, 0.35, 0.15]
-                }}
-                transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-20 right-10 w-40 h-40 bg-energy/15 rounded-full blur-3xl z-0 hidden md:block"
-            />
+            {/* Floating Energy Orbs - Disabled on low-end devices */}
+            {!reducedMotion && (
+                <>
+                    <motion.div
+                        animate={floatAnimation}
+                        transition={floatTransition}
+                        className="absolute top-20 left-10 w-32 h-32 bg-energy/20 rounded-full blur-3xl z-0 hidden md:block"
+                    />
+                    <motion.div
+                        animate={reducedMotion ? {} : {
+                            y: [0, 30, 0],
+                            x: [0, -20, 0],
+                            scale: [1, 1.3, 1],
+                            opacity: [0.15, 0.35, 0.15]
+                        }}
+                        transition={reducedMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        className="absolute bottom-20 right-10 w-40 h-40 bg-energy/15 rounded-full blur-3xl z-0 hidden md:block"
+                    />
+                </>
+            )}
 
             <div className="relative z-10 w-full max-w-7xl px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 mt-24 md:mt-32 lg:mt-20">
                 {/* Left: Content */}
@@ -92,16 +109,18 @@ export const Hero = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <motion.div
-                            initial={{ opacity: 0, y: -20 }}
+                            initial={{ opacity: 0, y: reducedMotion ? 0 : -20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
+                            transition={{ delay: reducedMotion ? 0 : 0.2 }}
                             className={cn("inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6 text-[10px] md:text-xs font-bold uppercase tracking-widest text-white shadow-xl relative overflow-hidden")}
                         >
-                            <motion.div
-                                animate={{ x: ["-100%", "100%"] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                            />
+                            {!reducedMotion && (
+                                <motion.div
+                                    animate={{ x: ["-100%", "100%"] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                />
+                            )}
                             <Zap className="w-4 h-4 text-energy relative z-10" />
                             <span className="relative z-10">Bubbloe Energy</span>
                         </motion.div>

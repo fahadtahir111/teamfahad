@@ -1,14 +1,24 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 const Particles = ({ count = 5000, color = "#FF4500" }) => {
     const points = useRef<THREE.Points>(null!);
+    const [particleCount, setParticleCount] = useState(200);
+    const [isLowEnd, setIsLowEnd] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const { getOptimalParticleCount, isLowEndDevice } = require('@/lib/performance');
+            setParticleCount(getOptimalParticleCount());
+            setIsLowEnd(isLowEndDevice());
+        }
+    }, []);
 
     // Reduced count to prevent WebGL context loss
-    const optimizedCount = 500;
+    const optimizedCount = particleCount;
 
     const particles = useMemo(() => {
         const positions = new Float32Array(optimizedCount * 3);
@@ -43,10 +53,14 @@ const Particles = ({ count = 5000, color = "#FF4500" }) => {
     }, [color]);
 
     useFrame(() => {
-        // Subtle, lag-free rotation
-        if (points.current) {
+        // Subtle, lag-free rotation - reduced on low-end devices
+        if (points.current && !isLowEnd) {
             points.current.rotation.y += 0.0008;
             points.current.rotation.x += 0.0004;
+        } else if (points.current && isLowEnd) {
+            // Even slower rotation for low-end devices
+            points.current.rotation.y += 0.0003;
+            points.current.rotation.x += 0.0002;
         }
     });
 
@@ -75,21 +89,35 @@ const Particles = ({ count = 5000, color = "#FF4500" }) => {
     );
 };
 
-const ParticleScene = ({ color }: { color?: string }) => {
+const ParticleScene = React.memo(({ color }: { color?: string }) => {
+    const [dpr, setDpr] = useState<number[]>([1, 1.5]);
+    
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const { getOptimalDPR } = require('@/lib/performance');
+            setDpr(getOptimalDPR());
+        }
+    }, []);
+
     return (
         <Canvas
             camera={{ position: [0, 0, 5], fov: 75 }}
-            dpr={[1, 1.5]}
+            dpr={dpr}
             gl={{
                 antialias: false,
                 powerPreference: "low-power",
-                preserveDrawingBuffer: true,
-                failIfMajorPerformanceCaveat: false
+                preserveDrawingBuffer: false, // Disabled for better performance
+                failIfMajorPerformanceCaveat: false,
+                stencil: false, // Disable stencil buffer
+                depth: true,
             }}
+            performance={{ min: 0.5 }} // Lower performance threshold
         >
             <Particles color={color} />
         </Canvas>
     );
-};
+});
+
+ParticleScene.displayName = 'ParticleScene';
 
 export default ParticleScene;

@@ -1,18 +1,25 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ShoppingCart, Zap, Droplets, Wind } from "lucide-react";
 import Link from "next/link";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/utils";
+import { usdToPkr } from "@/lib/currency";
 
 export default function ProductDetailPage() {
+    const [isLoading, setIsLoading] = useState(true);
     const containerRef = useRef(null);
     const [addedToCart, setAddedToCart] = useState(false);
     const { addToCart } = useCart();
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1200);
+        return () => clearTimeout(timer);
+    }, []);
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
@@ -24,20 +31,55 @@ export default function ProductDetailPage() {
 
     return (
         <div ref={containerRef} className="relative min-h-[200vh] bg-background">
-            <ParticleBackground />
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+                    >
+                        <div className="flex flex-col items-center gap-6">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+                            />
+                            <motion.p
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-white/60 font-bold text-lg"
+                            >
+                                Loading Product...
+                            </motion.p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoading ? 0 : 1 }}
+                transition={{ duration: 0.8 }}
+            >
+                <ParticleBackground />
 
-            {/* Back Button */}
-            <div className="fixed top-24 left-10 z-50">
-                <Link
-                    href="/shop"
-                    className="glass p-4 rounded-full flex items-center gap-2 font-bold hover:bg-energy hover:text-white transition-all group"
+                {/* Back Button */}
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: isLoading ? 0 : 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="fixed top-24 left-10 z-50"
                 >
-                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    BACK TO SHOP
-                </Link>
-            </div>
+                    <Link
+                        href="/shop"
+                        className="glass p-4 rounded-full flex items-center gap-2 font-bold hover:bg-energy hover:text-white transition-all group"
+                    >
+                        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                        BACK TO SHOP
+                    </Link>
+                </motion.div>
 
-            <div className="sticky top-0 h-screen w-full flex flex-col md:flex-row items-center justify-center px-6 gap-12 overflow-hidden">
+                <div className="sticky top-0 h-screen w-full flex flex-col md:flex-row items-center justify-center px-6 gap-12 overflow-hidden">
                 {/* Left Side: Cinematic Can Reveal */}
                 <div className="relative w-full md:w-1/2 h-1/2 md:h-full flex items-center justify-center">
                     <motion.div
@@ -104,7 +146,7 @@ export default function ProductDetailPage() {
                                 addToCart({
                                     id: 1,
                                     name: "ORIGINAL BOOST",
-                                    price: 3.99,
+                                    price: usdToPkr(3.99),
                                     image: "/images/vanilla.png",
                                     color: "bg-[#FFFDD0]"
                                 });
@@ -121,7 +163,8 @@ export default function ProductDetailPage() {
                         </motion.button>
                     </motion.div>
                 </div>
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 }

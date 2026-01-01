@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from "framer-motion";
 import { Send } from "lucide-react";
 
 export default function ContactPage() {
+    const [isLoading, setIsLoading] = useState(true);
     const [formState, setFormState] = useState("idle");
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1000);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Mouse move effect for the form container
     const x = useMotionValue(0);
@@ -37,13 +43,38 @@ export default function ContactPage() {
 
     return (
         <div className="min-h-screen bg-background pt-24 md:pt-32 pb-12 md:pb-20 px-4 md:px-6 flex items-center justify-center overflow-hidden">
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+                    >
+                        <div className="flex flex-col items-center gap-6">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+                            />
+                            <motion.p
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-white/60 font-bold text-lg"
+                            >
+                                Loading Contact...
+                            </motion.p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Background Glows */}
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-energy/10 rounded-full blur-[120px]" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-mint/10 rounded-full blur-[120px]" />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: isLoading ? 0 : 1, scale: isLoading ? 0.95 : 1 }}
                 transition={{ duration: 0.8 }}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
@@ -55,7 +86,7 @@ export default function ContactPage() {
                         GET IN <span className="text-energy uppercase">TOUCH</span>
                     </h1>
                     <p className="text-white/60 font-medium text-sm md:text-base">
-                        Have questions about our energy drinks? We're here to help you power up your day.
+                        Have questions about our energy drinks? We&apos;re here to help you power up your day.
                     </p>
                 </header>
 

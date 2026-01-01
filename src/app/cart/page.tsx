@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,16 +8,53 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Zap } from "lucide-react"
 import { useCart } from "@/context/CartContext";
 import { Magnetic } from "@/components/Magnetic";
 import { cn } from "@/lib/utils";
+import { formatPkr } from "@/lib/currency";
 
 export default function CartPage() {
+    const [isLoading, setIsLoading] = useState(true);
     const { cart, removeFromCart, updateQuantity, getTotalPrice, getTotalItems } = useCart();
     const total = getTotalPrice();
     const itemCount = getTotalItems();
 
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 800);
+        return () => clearTimeout(timer);
+    }, []);
+
     if (cart.length === 0) {
         return (
             <div className="min-h-screen bg-background pt-24 md:pt-32 pb-12 md:pb-20 px-4 md:px-6 flex items-center justify-center">
-                <div className="max-w-2xl w-full text-center">
+                <AnimatePresence>
+                    {isLoading && (
+                        <motion.div
+                            initial={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+                        >
+                            <div className="flex flex-col items-center gap-6">
+                                <motion.div
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+                                />
+                                <motion.p
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-white/60 font-bold text-lg"
+                                >
+                                    Loading Cart...
+                                </motion.p>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isLoading ? 0 : 1 }}
+                    transition={{ duration: 0.8 }}
+                    className="max-w-2xl w-full text-center"
+                >
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -40,14 +77,44 @@ export default function CartPage() {
                             </Link>
                         </Magnetic>
                     </motion.div>
-                </div>
+                </motion.div>
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-background pt-24 md:pt-32 pb-12 md:pb-20 px-4 md:px-6">
-            <div className="max-w-7xl mx-auto">
+            <AnimatePresence>
+                {isLoading && (
+                    <motion.div
+                        initial={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="fixed inset-0 z-[100] bg-background flex items-center justify-center"
+                    >
+                        <div className="flex flex-col items-center gap-6">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-16 h-16 border-4 border-energy/30 border-t-energy rounded-full"
+                            />
+                            <motion.p
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-white/60 font-bold text-lg"
+                            >
+                                Loading Cart...
+                            </motion.p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isLoading ? 0 : 1 }}
+                transition={{ duration: 0.8 }}
+            >
+                <div className="max-w-7xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -92,7 +159,7 @@ export default function CartPage() {
                                                 {item.name}
                                             </h3>
                                             <p className="text-energy font-bold text-lg md:text-xl">
-                                                ${item.price.toFixed(2)}
+                                                {formatPkr(item.price)}
                                             </p>
                                         </div>
 
@@ -126,7 +193,7 @@ export default function CartPage() {
 
                                         <div className="mt-2 text-right">
                                             <p className="text-white/50 text-sm">
-                                                Subtotal: <span className="text-energy font-bold">${(item.price * item.quantity).toFixed(2)}</span>
+                                                Subtotal: <span className="text-energy font-bold">{formatPkr(item.price * item.quantity)}</span>
                                             </p>
                                         </div>
                                     </div>
@@ -150,7 +217,7 @@ export default function CartPage() {
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-white/70 text-sm md:text-base">
                                     <span>Subtotal</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <span>{formatPkr(total)}</span>
                                 </div>
                                 <div className="flex justify-between text-white/70 text-sm md:text-base">
                                     <span>Shipping</span>
@@ -159,7 +226,7 @@ export default function CartPage() {
                                 <div className="h-px bg-white/10 my-4" />
                                 <div className="flex justify-between text-white text-lg md:text-xl font-black">
                                     <span>Total</span>
-                                    <span className="text-energy">${total.toFixed(2)}</span>
+                                    <span className="text-energy">{formatPkr(total)}</span>
                                 </div>
                             </div>
 
@@ -182,9 +249,11 @@ export default function CartPage() {
                         </motion.div>
                     </div>
                 </div>
-            </div>
+                </div>
+            </motion.div>
         </div>
     );
 }
+
 
 
