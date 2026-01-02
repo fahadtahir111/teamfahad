@@ -43,7 +43,7 @@ const flavors = [
 export const Hero = () => {
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
     const reducedMotion = useReducedMotion();
-    
+
     // Optimize animation props for low-end devices
     const floatAnimation = useMemo(() => {
         if (reducedMotion) return {};
@@ -54,10 +54,10 @@ export const Hero = () => {
             opacity: [0.2, 0.4, 0.2]
         };
     }, [reducedMotion]);
-    
+
     const floatTransition = useMemo(() => {
-        if (reducedMotion) return { duration: 0 };
-        return { duration: 6, repeat: Infinity, ease: "easeInOut" };
+        if (reducedMotion) return { duration: 0, repeat: 0, ease: "linear" } as const;
+        return { duration: 6, repeat: Infinity, ease: "easeInOut" } as const;
     }, [reducedMotion]);
 
     return (
@@ -93,7 +93,7 @@ export const Hero = () => {
                             scale: [1, 1.3, 1],
                             opacity: [0.15, 0.35, 0.15]
                         }}
-                        transition={reducedMotion ? { duration: 0 } : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        transition={reducedMotion ? { duration: 0, repeat: 0, ease: "linear", delay: 0 } as const : { duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 } as const}
                         className="absolute bottom-20 right-10 w-40 h-40 bg-energy/15 rounded-full blur-3xl z-0 hidden md:block"
                     />
                 </>
