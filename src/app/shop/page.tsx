@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 
-import { formatUsdToPkr, usdToPkr } from "@/lib/currency";
+
 
 const products = [
-    { id: 1, name: "PURE VANILLA", price: formatUsdToPkr(1.07), priceNum: usdToPkr(1.07), image: "/images/vanilla.png", color: "bg-[#FFFDD0]" },
-    { id: 2, name: "PEACH SURGE", price: formatUsdToPkr(1.07), priceNum: usdToPkr(1.07), image: "/images/peach.png", color: "bg-[#FFDAB9]" },
-    { id: 3, name: "MINTY MOTION", price: formatUsdToPkr(1.07), priceNum: usdToPkr(1.07), image: "/images/mint.png", color: "bg-[#98FFED]" },
-    { id: 4, name: "BERRY BLAST", price: formatUsdToPkr(1.07), priceNum: usdToPkr(1.07), image: "/images/berryblast.png", color: "bg-[#D8B4FE]" },
+    { id: 1, name: "PURE VANILLA", price: (300), priceNum: (300), image: "/images/vanilla.png", color: "bg-[#FFFDD0]" },
+    { id: 2, name: "PEACH SURGE", price: (300), priceNum: (300), image: "/images/peach.png", color: "bg-[#FFDAB9]" },
+    { id: 3, name: "MINTY MOTION", price: (300), priceNum: (300), image: "/images/mint.png", color: "bg-[#98FFED]" },
+    { id: 4, name: "BERRY BLAST", price: (300), priceNum: (300), image: "/images/berryblast.png", color: "bg-[#D8B4FE]" },
 ];
 
 export default function ShopPage() {
