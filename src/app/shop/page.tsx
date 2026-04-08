@@ -5,7 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/GlassCard";
 
 import { formatUsdToPkr, usdToPkr } from "@/lib/currency";
-import { productService } from "@/services/productService";
+
+const products = [
+    { id: 1, name: "PURE VANILLA", price: formatUsdToPkr(3.99), priceNum: usdToPkr(3.99), image: "/images/vanilla.png", color: "bg-[#FFFDD0]" },
+    { id: 2, name: "PEACH SURGE", price: formatUsdToPkr(4.49), priceNum: usdToPkr(4.49), image: "/images/peach.png", color: "bg-[#FFDAB9]" },
+    { id: 3, name: "MINTY MOTION", price: formatUsdToPkr(4.49), priceNum: usdToPkr(4.49), image: "/images/mint.png", color: "bg-[#98FFED]" },
+    { id: 4, name: "BERRY BLAST", price: formatUsdToPkr(3.99), priceNum: usdToPkr(3.99), image: "/images/berryblast.png", color: "bg-[#D8B4FE]" },
+];
 
 export default function ShopPage() {
     const [products, setProducts] = useState<any[]>([]);
