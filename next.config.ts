@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
-  // Optimize bundle
   // Reduce JavaScript bundle size
   experimental: {
     optimizePackageImports: ['framer-motion', 'lucide-react', 'three'],

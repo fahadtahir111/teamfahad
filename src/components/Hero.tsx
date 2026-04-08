@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Zap, Droplets, Info } from "lucide-react";
 import Link from "next/link";
-import { ParticleBackground } from "./ParticleBackground";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "./Magnetic";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -40,11 +39,13 @@ const flavors = [
     }
 ];
 
-export const Hero = () => {
+export const Hero = ({ settings }: { settings?: any[] }) => {
+    const getSetting = (key: string, fallback: string) =>
+        settings?.find(s => s.key === key)?.value || fallback;
+
     const [activeFlavor, setActiveFlavor] = useState(flavors[0]);
     const reducedMotion = useReducedMotion();
 
-    // Optimize animation props for low-end devices
     const floatAnimation = useMemo(() => {
         if (reducedMotion) return {};
         return {
@@ -62,8 +63,21 @@ export const Hero = () => {
 
     return (
         <section className="relative min-h-screen w-full flex items-center justify-center overflow-x-hidden bg-background transition-colors duration-1000">
-            {/* Background Particles */}
-            <ParticleBackground color={activeFlavor.accent} />
+            {/* Dynamic Background Image */}
+            {getSetting("HERO_IMAGE", "") && (
+                <div className="absolute inset-0 z-0">
+                    <Image
+                        src={getSetting("HERO_IMAGE", "")}
+                        alt="Hero Background"
+                        fill
+                        className="object-cover opacity-20 grayscale brightness-50"
+                        priority
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+                </div>
+            )}
+
+            {/* Background Glows */}
 
             {/* Dynamic Background Glows */}
             <AnimatePresence mode="wait">
@@ -78,7 +92,6 @@ export const Hero = () => {
                 />
             </AnimatePresence>
 
-            {/* Floating Energy Orbs - Disabled on low-end devices */}
             {!reducedMotion && (
                 <>
                     <motion.div
@@ -100,7 +113,6 @@ export const Hero = () => {
             )}
 
             <div className="relative z-10 w-full max-w-7xl px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 mt-24 md:mt-32 lg:mt-20">
-                {/* Left: Content */}
                 <div className="w-full md:w-1/2 text-center md:text-left order-2 md:order-1">
                     <motion.div
                         key={activeFlavor.id}
@@ -126,14 +138,14 @@ export const Hero = () => {
                         </motion.div>
 
                         <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-black tracking-tighter text-white mb-4 md:mb-6 leading-none uppercase italic drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-                            MAXIMUM <br />
+                            {getSetting("HERO_TITLE", "MAXIMUM ENERGY")} <br />
                             <span className={cn("transition-colors duration-1000", activeFlavor.id === "vanilla" ? "text-[#F3E5AB] drop-shadow-[0_0_20px_rgba(243,229,171,0.3)]" : activeFlavor.id === "peach" ? "text-orange-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]" : "text-mint drop-shadow-[0_0_20px_rgba(152,255,237,0.3)]")}>
-                                {activeFlavor.id === "vanilla" ? "ENERGY" : activeFlavor.id === "peach" ? "BOOST" : "POWER"}
+                                {activeFlavor.id === "vanilla" ? "BOOST" : activeFlavor.id === "peach" ? "POWER" : "SURGE"}
                             </span>
                         </h1>
 
                         <p className="text-sm md:text-base lg:text-xl text-white/50 mb-6 md:mb-10 max-w-md font-medium mx-auto md:mx-0 leading-relaxed">
-                            Premium energy drinks with explosive flavors. Experience maximum energy boost.
+                            {getSetting("HERO_SUBTITLE", "Premium energy drinks with explosive flavors. Experience maximum energy boost.")}
                         </p>
 
                         <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 justify-center md:justify-start">
@@ -144,7 +156,7 @@ export const Hero = () => {
                                         whileTap={{ scale: 0.95 }}
                                         className={cn("w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 text-black rounded-full font-black text-base md:text-lg lg:text-xl flex items-center justify-center gap-3 shadow-xl hover:shadow-1xl transition-all duration-500 will-change-transform", activeFlavor.color, activeFlavor.shadow)}
                                     >
-                                        SHOP NOW
+                                        {getSetting("HERO_CTA_TEXT", "SHOP NOW")}
                                         <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                                     </motion.button>
                                 </Link>
@@ -160,7 +172,6 @@ export const Hero = () => {
                     </motion.div>
                 </div>
 
-                {/* Right: Interactive Product Showcase */}
                 <div className="w-full md:w-1/2 relative flex flex-col items-center justify-center md:min-h-[500px] lg:min-h-[600px] order-1 md:order-2 pb-8 md:pb-12 lg:pb-0">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -171,7 +182,6 @@ export const Hero = () => {
                             transition={{ duration: 0.5 }}
                             className="relative w-[200px] h-[300px] sm:w-[240px] sm:h-[350px] md:w-[350px] md:h-[500px] lg:w-[400px] lg:h-[550px] z-20 group"
                         >
-                            {/* Glow Effect Behind Card */}
                             <motion.div
                                 animate={{
                                     scale: [1, 1.2, 1],
@@ -181,12 +191,10 @@ export const Hero = () => {
                                 className={cn("absolute inset-0 rounded-[60px] blur-3xl -z-10", activeFlavor.color)}
                             />
 
-                            {/* main card */}
                             <motion.div
                                 whileHover={{ rotateY: 5, rotateX: -5, scale: 1.02 }}
                                 className="w-full h-full glass rounded-[50px] md:rounded-[60px] border-white/20 shadow-2xl relative flex flex-col items-center justify-center p-6 md:p-8 overflow-visible"
                             >
-                                {/* Animated Border Glow */}
                                 <motion.div
                                     animate={{
                                         rotate: [0, 360],
@@ -213,14 +221,12 @@ export const Hero = () => {
                                 </div>
                             </motion.div>
 
-                            {/* info badge */}
                             <motion.div
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                 whileHover={{ scale: 1.1, rotate: 360 }}
                                 className="absolute -top-4 -right-4 md:-top-6 md:-right-6 w-16 h-16 md:w-24 md:h-24 bg-energy rounded-full shadow-2xl flex flex-col items-center justify-center z-30 border-4 border-white/20 relative overflow-hidden cursor-pointer"
                             >
-                                {/* Pulsing Ring */}
                                 <motion.div
                                     animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
                                     transition={{ duration: 2, repeat: Infinity }}
@@ -232,7 +238,6 @@ export const Hero = () => {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* Selector Grid Overlay */}
                     <div className="relative md:absolute mt-6 md:mt-0 md:-bottom-12 md:bottom-0 left-auto md:left-1/2 transform-none md:-translate-x-1/2 flex gap-2 md:gap-3 lg:gap-4 p-2 md:p-3 lg:p-4 glass rounded-[20px] md:rounded-[24px] lg:rounded-[32px] shadow-2xl z-30">
                         {flavors.map((flavor) => (
                             <button
@@ -250,7 +255,6 @@ export const Hero = () => {
                 </div>
             </div>
 
-            {/* Scroll Hint */}
             <motion.div
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}

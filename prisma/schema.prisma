@@ -1,0 +1,374 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model activity {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  metadata  String?
+  userId    String?
+  createdAt DateTime @default(now())
+  user      user?    @relation(fields: [userId], references: [id])
+}
+
+model category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   product[]
+}
+
+model order {
+  id              String          @id @default(cuid())
+  customerName    String
+  customerEmail   String
+  totalAmount     Float
+  status          order_status    @default(PENDING)
+  shippingAddress String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  paymentMethod   payment_method  @default(COD)
+  paymentStatus   payment_status  @default(PENDING)
+  couponId        String?
+  coupon          coupon?         @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  orderitem       orderitem[]
+  tracking        order_tracking?
+
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+}
+
+model orderitem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   product @relation(fields: [productId], references: [id])
+}
+
+model product {
+  id           String                  @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  image        String
+  color        String?
+  categoryId   String?
+  inventory    Int                     @default(0)
+  sku          String?                 @unique
+  slug         String?                 @unique
+  isActive     Boolean                 @default(true)
+  isFeatured   Boolean                 @default(false)
+  weight       Float?
+  dimensions   String? // JSON: {length, width, height}
+  tags         String? // Comma-separated tags
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  category     category?               @relation(fields: [categoryId], references: [id])
+  orderitem    orderitem[]
+  reviews      review[]
+  variants     product_variant[]
+  cartItems    cart_item[]
+  wishlist     wishlist[]
+  reservations inventory_reservation[] // NEW: For locking inventory
+
+  @@index([isActive])
+  @@index([isFeatured])
+}
+
+model setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model user {
+  id            String                  @id @default(cuid())
+  name          String?
+  email         String?                 @unique
+  password      String?
+  image         String?
+  phone         String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  role          user_role               @default(USER)
+  activity      activity[]
+  reviews       review[]
+  carts         cart[]
+  wishlist      wishlist[]
+  addresses     address[]
+  notifications notification[]
+  reservations  inventory_reservation[] // NEW
+}
+
+enum order_status {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum user_role {
+  USER
+  ADMIN
+  SUPPORT // NEW
+  INVENTORY_MANAGER // NEW
+  SUPER_ADMIN // NEW
+}
+
+enum payment_method {
+  COD
+  CARD
+}
+
+enum payment_status {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// Coupons for discounts
+model coupon {
+  id          String      @id @default(cuid())
+  code        String      @unique
+  type        coupon_type @default(PERCENTAGE)
+  value       Float
+  minPurchase Float?
+  maxDiscount Float?
+  usageLimit  Int?
+  usedCount   Int         @default(0)
+  isActive    Boolean     @default(true)
+  validFrom   DateTime
+  validUntil  DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orders      order[]
+
+  @@index([isActive])
+}
+
+enum coupon_type {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
+// Product Reviews and Ratings
+model review {
+  id         String   @id @default(cuid())
+  productId  String
+  userId     String?
+  rating     Int // 1-5
+  title      String?
+  comment    String?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user       user?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([isApproved])
+}
+
+// Payment Gateways Configuration
+model payment_gateway {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  provider    String // stripe, paypal, jazzcash, easypaisa, etc.
+  isActive    Boolean  @default(false)
+  credentials String // Encrypted JSON
+  settings    String? // Additional settings JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// Persistent Shopping Cart
+model cart {
+  id        String      @id @default(cuid())
+  userId    String?
+  sessionId String? // For guest carts
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  items     cart_item[]
+  user      user?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+
+model cart_item {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+// Wishlist
+model wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+// User Addresses
+model address {
+  id           String       @id @default(cuid())
+  userId       String
+  type         address_type @default(BILLING)
+  firstName    String
+  lastName     String
+  phone        String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String?
+  postalCode   String
+  country      String
+  isDefault    Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         user         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isDefault])
+}
+
+enum address_type {
+  BILLING
+  SHIPPING
+  BOTH
+}
+
+// Notifications
+model notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      user?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// Analytics Events
+model analytics_event {
+  id        String   @id @default(cuid())
+  eventType String
+  userId    String?
+  sessionId String?
+  metadata  String? // JSON
+  createdAt DateTime @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+// Product Variants (for different sizes, colors, etc.)
+model product_variant {
+  id        String   @id @default(cuid())
+  productId String
+  name      String // e.g., "500ml", "Red", "Large"
+  sku       String?  @unique
+  price     Float? // Override product price if set
+  inventory Int      @default(0)
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Order Tracking
+model order_tracking {
+  id                String    @id @default(cuid())
+  orderId           String    @unique
+  trackingNumber    String?
+  carrier           String?
+  status            String
+  location          String?
+  estimatedDelivery DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  order             order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([trackingNumber])
+}
+
+// ==========================================
+// *** NEW ENTERPRISE MODELS ***
+// ==========================================
+
+// Concurrency-Safe Inventory Reservations
+// Protects from overselling by "locking" inventory during checkout
+model inventory_reservation {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String?
+  sessionId String? // For guest reservations
+  quantity  Int
+  expiresAt DateTime // Typically set to ~15 mins after creation
+  createdAt DateTime @default(now())
+
+  product product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    user?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([expiresAt])
+}
+
+// Fulfillment Zones for Advanced Shipping
+// Map delivery costs based on the geographical region
+model fulfillment_zone {
+  id        String   @id @default(cuid())
+  name      String // e.g., "North America", "Europe", "Local Metro"
+  regions   String[] // Array of regions/countries/states applied to this zone
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rates shipping_rate[]
+}
+
+model shipping_rate {
+  id            String   @id @default(cuid())
+  zoneId        String
+  name          String // e.g., "Standard Shipping", "Express"
+  price         Float
+  minOrderVal   Float? // Apply rate if order is above this value
+  maxOrderVal   Float? // Apply rate if order is below this value
+  estimatedDays Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  zone fulfillment_zone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+}

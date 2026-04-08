@@ -40,3 +40,8 @@ export const getOptimizedAnimation = (reducedMotion: boolean) => {
     return {};
 };
 
+
+
+
+
+

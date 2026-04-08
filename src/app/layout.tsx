@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { CustomCursor } from "@/components/CustomCursor";
 import { PageTransition } from "@/components/PageTransition";
 import { SmoothScroll } from "@/components/SmoothScroll";
-import { CartProvider } from "@/context/CartContext";
+import { ClientProviders } from "@/components/providers/ClientProviders";
+import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { SocialProof } from "@/components/SocialProof";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Premium System Font Stacks
+const systemSans = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const systemMono = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 
 export const metadata: Metadata = {
   title: "BUBBLOE | Premium Energy Drinks | Maximum Energy Boost",
@@ -31,17 +24,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
+        className="antialiased relative"
+        style={{ fontFamily: systemSans }}
         suppressHydrationWarning
       >
-        <CartProvider>
+        <ClientProviders>
           <CustomCursor />
-          <Navbar />
-          <SmoothScroll>
-            <PageTransition>{children}</PageTransition>
-          </SmoothScroll>
-          <Footer />
-        </CartProvider>
+          <LayoutWrapper>
+            <SmoothScroll>
+              <PageTransition>{children}</PageTransition>
+            </SmoothScroll>
+          </LayoutWrapper>
+          <SocialProof />
+        </ClientProviders>
       </body>
     </html>
   );

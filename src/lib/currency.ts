@@ -25,3 +25,8 @@ export const formatUsdToPkr = (usdPrice: number): string => {
     return formatPkr(usdToPkr(usdPrice));
 };
 
+
+
+
+
+

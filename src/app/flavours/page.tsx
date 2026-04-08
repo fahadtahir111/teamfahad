@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Zap, Droplets, Wind, ShoppingCart, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { ParticleBackground } from "@/components/ParticleBackground";
 import { cn } from "@/lib/utils";
 import { Magnetic } from "@/components/Magnetic";
 import { useCart } from "@/context/CartContext";
@@ -104,6 +103,8 @@ export default function FlavoursPage() {
     const [selectedFlavor, setSelectedFlavor] = useState<Flavor>(flavors[0]);
     const [addedToCart, setAddedToCart] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [settings, setSettings] = useState<any[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [imagesLoaded, setImagesLoaded] = useState<Set<string>>(new Set());
     const containerRef = useRef<HTMLDivElement>(null);
     const { addToCart } = useCart();
@@ -125,12 +126,32 @@ export default function FlavoursPage() {
         });
     };
 
-    // Check if all initial images are loaded
+    // Check if initial images are loaded and fetch settings
     useEffect(() => {
+        const fetchSettingsAndProducts = async () => {
+            try {
+                const [settingsRes, productsRes] = await Promise.all([
+                    fetch("/api/settings"),
+                    fetch("/api/products")
+                ]);
+                const settingsData = await settingsRes.json();
+                const productsData = await productsRes.json();
+
+                setSettings(Array.isArray(settingsData) ? settingsData : []);
+                setProducts(Array.isArray(productsData) ? productsData : []);
+            } catch (error) {
+                console.error("Failed to fetch page data");
+            }
+        };
+        fetchSettingsAndProducts();
+
         if (imagesLoaded.size >= flavors.length) {
             setTimeout(() => setIsLoading(false), 300);
         }
     }, [imagesLoaded]);
+
+    const getSetting = (key: string, fallback: string) =>
+        settings?.find(s => s.key === key)?.value || fallback;
 
     // Fallback timeout to ensure page loads even if images fail
     useEffect(() => {
@@ -143,10 +164,10 @@ export default function FlavoursPage() {
     // Preload all flavor images
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        
+
         // Use HTMLImageElement to avoid conflict with Next.js Image component
         const ImageConstructor = window.HTMLImageElement || (window as any).Image;
-        
+
         flavors.forEach((flavor) => {
             const img = document.createElement('img');
             img.src = flavor.image;
@@ -184,8 +205,6 @@ export default function FlavoursPage() {
                 )}
             </AnimatePresence>
 
-            <ParticleBackground color={selectedFlavor.accent} />
-
             {/* Hero Section */}
             <motion.section
                 style={{ opacity: heroOpacity, y: heroY }}
@@ -208,11 +227,11 @@ export default function FlavoursPage() {
                             Energy Flavours
                         </motion.div>
                         <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-[10rem] font-black italic tracking-tighter mb-4 md:mb-6 uppercase leading-[0.85] text-white">
-                            EXPLORE <br className="sm:hidden" />
-                            <span className="text-energy">ENERGY FLAVORS</span>
+                            {getSetting("FLAVOURS_TITLE", "EXPLORE")} <br className="sm:hidden" />
+                            <span className="text-energy">{getSetting("FLAVOURS_SUBTITLE", "ENERGY FLAVORS")}</span>
                         </h1>
                         <p className="text-sm md:text-base lg:text-lg xl:text-xl text-white/50 max-w-2xl mx-auto font-medium px-4">
-                            Each flavor delivers maximum energy boost. Discover premium energy drinks with explosive flavors.
+                            {getSetting("FLAVOURS_DESC", "Each flavor delivers maximum energy boost. Discover premium energy drinks with explosive flavors.")}
                         </p>
                     </motion.div>
 
@@ -446,24 +465,22 @@ export default function FlavoursPage() {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => {
-                                            // Map flavor IDs to product IDs and prices (in PKR)
-                                            const flavorToProduct: Record<string, { id: number; price: number }> = {
-                                                vanilla: { id: 1, price: usdToPkr(3.99) },
-                                                peach: { id: 2, price: usdToPkr(4.49) },
-                                                mint: { id: 3, price: usdToPkr(4.49) },
-                                                berry: { id: 4, price: usdToPkr(3.99) }
-                                            };
-                                            const product = flavorToProduct[selectedFlavor.id];
-                                            if (product) {
+                                            // Find the corresponding database product by name
+                                            const dbProduct = products.find(p => p.name.toUpperCase() === selectedFlavor.name.toUpperCase());
+
+                                            if (dbProduct) {
                                                 addToCart({
-                                                    id: product.id,
-                                                    name: selectedFlavor.name,
-                                                    price: product.price,
-                                                    image: selectedFlavor.image,
-                                                    color: selectedFlavor.bgColor
+                                                    id: dbProduct.id,
+                                                    name: dbProduct.name,
+                                                    price: dbProduct.price,
+                                                    image: dbProduct.image,
+                                                    color: dbProduct.color || selectedFlavor.bgColor
                                                 });
                                                 setAddedToCart(true);
                                                 setTimeout(() => setAddedToCart(false), 2000);
+                                            } else {
+                                                console.error("No database product found for", selectedFlavor.name);
+                                                alert("This product is currently unavailable.");
                                             }
                                         }}
                                         className={cn(

@@ -60,3 +60,8 @@ export const getOptimalDPR = (): [number, number] => {
     return [1, 1.5]; // Standard DPR
 };
 
+
+
+
+
+

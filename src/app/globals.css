@@ -13,6 +13,7 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -33,8 +34,8 @@
   --color-yellow: var(--brand-yellow);
   --color-energy: var(--brand-energy);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   --animate-liquid: liquid 5s ease-in-out infinite;
   --animate-float: float 3s ease-in-out infinite;
@@ -131,7 +132,6 @@ body {
 
 .liquid-nav {
   position: relative;
-  overflow: hidden;
 }
 
 .liquid-nav::after {

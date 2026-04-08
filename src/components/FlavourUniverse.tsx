@@ -2,12 +2,6 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
-import dynamic from "next/dynamic";
-
-const FlavourScene = dynamic(() => import("./FlavourScene"), {
-    ssr: false,
-    loading: () => <div className="absolute inset-0 bg-transparent" />
-});
 
 export const FlavourUniverse = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -24,23 +18,64 @@ export const FlavourUniverse = () => {
 
     const opacity = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
     const scale = useTransform(smoothProgress, [0, 0.2, 0.8, 1], [0.8, 1, 1, 0.8]);
-    const rotateY = useTransform(smoothProgress, [0, 1], [0, Math.PI * 2]);
+
+    // Instead of 3D rotation, we'll translate elements
+    const y1 = useTransform(smoothProgress, [0, 1], [100, -100]);
+    const y2 = useTransform(smoothProgress, [0, 1], [-50, 50]);
+    const rotate = useTransform(smoothProgress, [0, 1], [0, 360]);
 
     const flavours = [
-        { name: "Wild Berry", color: "#A78BFA" },
-        { name: "Peach Punch", color: "#FDBA74" },
-        { name: "Minty Fresh", color: "#98FFED" },
-        { name: "Citrus Blast", color: "#FACC15" },
+        { name: "Wild Berry", color: "#A78BFA", position: "top-1/4 left-1/4" },
+        { name: "Peach Punch", color: "#FDBA74", position: "bottom-1/4 right-1/4" },
+        { name: "Minty Fresh", color: "#98FFED", position: "top-1/3 right-1/4" },
+        { name: "Citrus Blast", color: "#FACC15", position: "bottom-1/3 left-1/3" },
     ];
 
     return (
         <section ref={containerRef} className="relative h-[150vh] w-full bg-background overflow-hidden border-y border-white/5">
             <motion.div
                 style={{ opacity, scale }}
-                className="sticky top-0 h-screen w-full flex items-center justify-center pt-32"
+                className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden"
             >
-                <div className="absolute inset-0 z-0">
-                    <FlavourScene rotateY={rotateY} />
+                {/* Background Gradient Core */}
+                <motion.div
+                    className="absolute w-[600px] h-[600px] rounded-full bg-energy/10 blur-[120px]"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                />
+
+                {/* Floating Flavor Orbs (Replacing 3D Spheres) */}
+                <div className="absolute inset-0 w-full h-full max-w-7xl mx-auto">
+                    {flavours.map((f, i) => (
+                        <motion.div
+                            key={i}
+                            className={`absolute ${f.position} w-32 h-32 md:w-48 md:h-48 rounded-full blur-2xl opacity-60`}
+                            style={{
+                                backgroundColor: f.color,
+                                y: i % 2 === 0 ? y1 : y2,
+                            }}
+                            animate={{
+                                scale: [1, 1.1, 1],
+                            }}
+                            transition={{
+                                duration: 3 + i,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        />
+                    ))}
+                    {/* Crisp Circles on top of blur */}
+                    {flavours.map((f, i) => (
+                        <motion.div
+                            key={`crisp-${i}`}
+                            className={`absolute ${f.position} w-4 h-4 md:w-8 md:h-8 rounded-full border border-white/20`}
+                            style={{
+                                borderColor: f.color,
+                                y: i % 2 === 0 ? y2 : y1,
+                                rotate
+                            }}
+                        />
+                    ))}
                 </div>
 
                 <div className="relative z-10 w-full max-w-7xl px-6 pointer-events-none text-center">
